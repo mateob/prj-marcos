@@ -1,0 +1,30 @@
+{
+  "name": "prj-marcos",
+  "version": "1.0.0",
+  "description": "Teste",
+  "main": "index.js",
+  "scripts": {
+    "start:dev": "nodemon",
+    "start": "npm run build && node build/index.js",
+    "build": "rimraf ./build && tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mateob/prj-marcos.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mateob/prj-marcos/issues"
+  },
+  "homepage": "https://github.com/mateob/prj-marcos#readme",
+  "devDependencies": {
+    "@types/node": "^17.0.15",
+    "nodemon": "^2.0.15",
+    "rimraf": "^3.0.2",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.5"
+  }
+}
