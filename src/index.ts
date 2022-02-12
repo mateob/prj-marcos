@@ -26,6 +26,8 @@ const run = () => {
 		carro1.colocarCinto('PL');
 		carro1.fechar('PR');
 
+		carro1.instalarCadeira('PL', 'B', 'Rafael', 1);
+
 		carro1.ligar();
 		console.log('Acionando a Freio');
 		carro1.freio();
