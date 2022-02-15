@@ -16,6 +16,10 @@ import { BaseObject } from './base/baseObjec';
 import { BebeConforto } from './base/cadeirinhas/bebe-conforto';
 import { Cadeira } from './base/cadeirinhas/cadeira';
 import { CadeiraElevacao } from './base/cadeirinhas/cadeira-elevacao';
+import { BabyChear, Quem, QuemBack } from '../types/quem.type';
+import { QuemUtils } from '../utils/quem.utils';
+import { PosicaoX } from '../enum/posicao-x.enum';
+import { PosicaoY } from '../enum/posicao-y.enum';
 
 export class Carro {
 	// Quando a Class e instanciada "Primeria coisa a ser feita antes de qualquer outra"
@@ -24,11 +28,11 @@ export class Carro {
 	}
 
 	private _passageiros: Passageiro[] = [
-		new Passageiro('L', 'F'),
-		new Passageiro('L', 'B'),
-		new Passageiro('R', 'F'),
-		new Passageiro('R', 'B'),
-		new Passageiro('C', 'B')
+		new Passageiro(PosicaoX.L, PosicaoY.F),
+		new Passageiro(PosicaoX.L, PosicaoY.B),
+		new Passageiro(PosicaoX.R, PosicaoY.F),
+		new Passageiro(PosicaoX.R, PosicaoY.B),
+		new Passageiro(PosicaoX.C, PosicaoY.B)
 	];
 
 	private _rodas: number = 4;
@@ -38,10 +42,10 @@ export class Carro {
 	public readonly chassi: number = 1;
 
 	private _farol: Farol[] = [
-		new Lanterna('L'),
-		new Lanterna('R'),
-		new LanternaTrazeira('L'),
-		new LanternaTrazeira('R')
+		new Lanterna(PosicaoX.L),
+		new Lanterna(PosicaoX.R),
+		new LanternaTrazeira(PosicaoX.L),
+		new LanternaTrazeira(PosicaoX.R)
 	];
 
 	public ligar(): void {
@@ -98,7 +102,7 @@ export class Carro {
 		});
 	}
 
-	public abrir(quem: 'M' | 'C' | 'PL' | 'PR'): void {
+	public abrir(quem: Quem): void {
 		const porta = this.pesquisarEntidade(quem, this._portas) as Porta;
 		if (porta) {
 			porta.abrir();
@@ -107,7 +111,7 @@ export class Carro {
 		}
 	}
 
-	public fechar(quem: 'M' | 'C' | 'PL' | 'PR'): void {
+	public fechar(quem: Quem): void {
 		const porta = this.pesquisarEntidade(quem, this._portas) as Porta;
 		if (porta) {
 			porta.fechar();
@@ -116,11 +120,11 @@ export class Carro {
 		}
 	}
 
-	public sentar(quem: 'M' | 'C' | 'PL' | 'PR', nome: string, idade: number): void {
+	public sentar(quem: Quem, nome: string, idade: number): void {
 		const passageiro = this.pesquisarEntidade(quem, this._passageiros) as Passageiro;
 		if (passageiro) {
 			passageiro.sentar(nome, idade);
-			const banco = this._bancos.find((b) => b.pX === passageiro.pX && b.pY === passageiro.pY);
+			const banco = this.pesquisarEntidade(quem, this._bancos) as Banco;
 			if (banco) {
 				banco.slot = passageiro;
 			} else {
@@ -131,10 +135,10 @@ export class Carro {
 		}
 	}
 
-	public instalarCadeira(quem: 'PL' | 'PR', tipo: 'B' | 'C' | 'E', nome: string, idade: number): void {
+	public instalarCadeira(quem: Quem, tipo: PosicaoY.B | PosicaoX.C | 'E'): void {
 		const banco = this.pesquisarEntidade(quem, this._bancos) as Banco;
 		if (banco && !banco.slot) {
-			banco.slot = this.criarCadeirinha(quem, tipo, nome, idade);
+			banco.slot = this.criarCadeirinha(quem, tipo);
 		} else if (banco) {
 			console.log('Ei! estou ocupado com ', banco.slot);
 		} else {
@@ -142,24 +146,44 @@ export class Carro {
 		}
 	}
 
-	private criarCadeirinha(
-		quem: 'PL' | 'PR',
-		tipo: 'B' | 'C' | 'E',
-		nome: string,
-		idade: number
-	): Cadeirinha | undefined {
-		const { x, y } = this.quemE(quem);
-		switch (tipo) {
-			case 'B':
-				return new BebeConforto(x, y, nome, idade);
-			case 'C':
-				return new Cadeira(x, y, nome, idade);
-			case 'E':
-				return new CadeiraElevacao(x, y, nome, idade);
+	public sentarCrianca(quem: 'PL' | 'PR' | 'PC', nome: string, idade: number ) {
+		const banco = this.pesquisarEntidade(quem, this._bancos) as Banco;
+		if(banco){
+			if (banco.slot instanceof Cadeirinha) {
+				if (banco.slot.validarIdade(idade)) {
+					banco.slot.colocarCrianca(nome, idade);
+				} else {
+					console.log('Crainça não comporta para esta cadeirinha', idade);
+				}
+			} else if (banco.slot) {
+				console.log('O Banco esta ocupado', banco.slot.obterPosicao);
+			} else {
+				console.log('O Banco esta vazio, coloque uma cadeirinha para ', nome);
+			}
+		} else {
+			console.log('Banco não existe!');
 		}
 	}
 
-	private pesquisarEntidade(quem: 'M' | 'C' | 'PL' | 'PR', lista: BaseObject[]): BaseObject | undefined {
+	private criarCadeirinha(
+		quem: QuemBack,
+		tipo: BabyChear,
+	): Cadeirinha | undefined {
+		const { x, y } = QuemUtils.quemE(quem);
+		switch (tipo) {
+			case PosicaoY.B:
+				console.log('Colocou a cadeira BebeConforto');
+				return new BebeConforto(x, y);
+			case PosicaoX.C:
+				console.log('Colocou a cadeira Cadeira');
+				return new Cadeira(x, y);
+			case 'E':
+				console.log('Colocou a cadeira Cadeira Elevação');
+				return new CadeiraElevacao(x, y);
+		}
+	}
+
+	private pesquisarEntidade(quem: Quem | string, lista: BaseObject[]): BaseObject | undefined {
 		// let retorno: Passageiro | undefined = undefined;
 		// for (let x = 0; x < this._passageiros.length; x += 1) {
 		// 	const passageiro = this._passageiros[x];
@@ -171,25 +195,12 @@ export class Carro {
 
 		// return retorno;
 		return lista.find((p) => {
-			const coordenadas = this.quemE(quem);
+			const coordenadas = QuemUtils.quemE(quem);
 			return p.pX === coordenadas.x && p.pY === coordenadas.y;
 		});
 	}
 
-	private quemE(quem: 'M' | 'C' | 'PL' | 'PR'): { x: string; y: string } {
-		switch (quem) {
-			case 'M':
-				return { x: 'L', y: 'F' };
-			case 'PL':
-				return { x: 'L', y: 'B' };
-			case 'C':
-				return { x: 'R', y: 'F' };
-			case 'PR':
-				return { x: 'R', y: 'B' };
-		}
-	}
-
-	public levantarse(quem: 'M' | 'C' | 'PL' | 'PR'): void {
+	public levantarse(quem: Quem): void {
 		const passageiro = this.pesquisarEntidade(quem, this._passageiros) as Passageiro;
 		if (passageiro) {
 			passageiro.liberado();
@@ -208,7 +219,7 @@ export class Carro {
 		}
 	}
 
-	public colocarCinto(quem: 'M' | 'C' | 'PL' | 'PR'): void {
+	public colocarCinto(quem: Quem): void {
 		const cinto = this.pesquisarEntidade(quem, this._cinto) as Cinto;
 		if (cinto) {
 			cinto.travar();
@@ -217,7 +228,7 @@ export class Carro {
 		}
 	}
 
-	public tirarCinto(quem: 'M' | 'C' | 'PL' | 'PR'): void {
+	public tirarCinto(quem: Quem): void {
 		const cinto = this.pesquisarEntidade(quem, this._cinto) as Cinto;
 		if (cinto) {
 			cinto.destravar();
@@ -225,29 +236,63 @@ export class Carro {
 			console.log('Cinto esta estragado ou com mal funcionamento');
 		}
 	}
+	
+	public listaChamada(): void {
+		this._bancos.forEach((b) => {
+			const posicao = `No ${b.obterPosicao},`;
+			if(b.slot instanceof Passageiro){
+				console.log(posicao, 'esta sentado', b.slot.nome);
+			} else if (b.slot instanceof Cadeirinha) {
+				if(b.slot.slot instanceof Passageiro){
+					console.log(posicao, 'esta', b.slot.tipo, 'e esta com', b.slot.slot.nome);
+				} else {
+					console.log(posicao, 'esta', b.slot.tipo, 'e esta vazia');
+				}
+			} else {
+				console.log(posicao, 'esta vazio');
+			}
+		});
+	}
 
 	private _pedais: Pedal[] = [ new Acelerador(), new Freio(), new Embreagem() ];
 
-	private _portas: Porta[] = [ new Porta('L', 'F'), new Porta('L', 'B'), new Porta('R', 'F'), new Porta('R', 'B') ];
-	private _bancos: Banco[] = [ new Banco('L', 'F'), new Banco('R', 'F'), new Banco('R', 'B'), new Banco('L', 'B') ];
-	private _espelhos: Espelho[] = [ new Espelho('L'), new Espelho('R'), new Espelho('C') ];
+	private _portas: Porta[] = [ 
+		new Porta(PosicaoX.L, PosicaoY.F), 
+		new Porta(PosicaoX.L, PosicaoY.B), 
+		new Porta(PosicaoX.R, PosicaoY.F), 
+		new Porta(PosicaoX.R, PosicaoY.B) 
+	];
+	
+	private _bancos: Banco[] = [ 
+		new Banco(PosicaoX.L, PosicaoY.F), 
+		new Banco(PosicaoX.R, PosicaoY.F), 
+		new Banco(PosicaoX.R, PosicaoY.B), 
+		new Banco(PosicaoX.L, PosicaoY.B),
+		new Banco(PosicaoX.C, PosicaoY.B) 
+	];
+
+	private _espelhos: Espelho[] = [ 
+		new Espelho(PosicaoX.L), 
+		new Espelho(PosicaoX.R), 
+		new Espelho(PosicaoX.C) 
+	];
 
 	private _cinto: Cinto[] = [
-		new Cinto('L', 'F'),
-		new Cinto('L', 'B'),
-		new Cinto('R', 'F'),
-		new Cinto('R', 'B'),
-		new Cinto('C', 'B', 2)
+		new Cinto(PosicaoX.L, PosicaoY.F),
+		new Cinto(PosicaoX.L, PosicaoY.B),
+		new Cinto(PosicaoX.R, PosicaoY.F),
+		new Cinto(PosicaoX.R, PosicaoY.B),
+		new Cinto(PosicaoX.C, PosicaoY.B, 2)
 	];
 
 	private _cadeirinhas: Cadeirinha[] = [];
 
 	private _macanetas: Macaneta[] = [
-		new Macaneta('L', 'F'),
-		new Macaneta('L', 'B'),
-		new Macaneta('R', 'F'),
-		new Macaneta('R', 'B'),
-		new Macaneta('C', 'B')
+		new Macaneta(PosicaoX.L, PosicaoY.F),
+		new Macaneta(PosicaoX.L, PosicaoY.B),
+		new Macaneta(PosicaoX.R, PosicaoY.F),
+		new Macaneta(PosicaoX.R, PosicaoY.B),
+		new Macaneta(PosicaoX.C, PosicaoY.B)
 	];
 
 	/** Tarefa para casa - 08/02/2022 */
@@ -265,7 +310,7 @@ export class Carro {
 	private _buzina: number = 1;
 
 	/** Tarefa para casa - 11/02/2022 */
-	// Adicionar a propriedade TIPO a entidade Banco aceitando 'T' | 'C'
+	// Adicionar a propriedade TIPO a entidade Banco aceitando 'T' | PosicaoX.C
 	// Adicionar os tres bancos trazeiros ao carro.
 	// Verificar se criança tem a ideade correta para o bebe conforto, e implementar metodo para colocar a criança na cadeirinha.
 	// Apresentar mensagem de BemVindo somente quando a criança estiver na cadeirinha (slot !== undefined)

@@ -1,3 +1,5 @@
+import { PosicaoX } from '../../enum/posicao-x.enum';
+import { PosicaoY } from '../../enum/posicao-y.enum';
 import { BaseObject } from './baseObjec';
 
 export class Passageiro extends BaseObject {
@@ -6,12 +8,12 @@ export class Passageiro extends BaseObject {
 	private _idade: number;
 
 	constructor(
-		posicaoX: 'L' | 'R' | 'C',
-		posicaoY: 'F' | 'B',
+		posicaoX: PosicaoX,
+		posicaoY: PosicaoY,
 		nome: string = 'Acento vazio',
 		ocupado: boolean = false
 	) {
-		super(posicaoX, posicaoY);
+		super(posicaoX, posicaoY, 'Lugar');
 		this._ocupado = ocupado;
 		this._nome = nome;
 		this._idade = 0;
@@ -20,6 +22,8 @@ export class Passageiro extends BaseObject {
 	public get acentoOcupado() {
 		return this._ocupado;
 	}
+
+	public get nome(): string { return this._nome; }
 
 	public liberado(): void {
 		this._ocupado = false;

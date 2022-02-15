@@ -1,3 +1,5 @@
+import { PosicaoX } from '../../enum/posicao-x.enum';
+import { PosicaoY } from '../../enum/posicao-y.enum';
 import { BaseObject } from './baseObjec';
 
 export class Porta extends BaseObject {
@@ -5,8 +7,8 @@ export class Porta extends BaseObject {
 	private trancada: boolean = false;
 	private acionado: boolean = false;
 
-	constructor(posicaoX: 'L' | 'R', posicaoY: 'F' | 'B') {
-		super(posicaoX, posicaoY);
+	constructor(posicaoX: PosicaoX, posicaoY: PosicaoY) {
+		super(posicaoX, posicaoY, 'Porta');
 	}
 
 	public get portaAberta() {

@@ -1,11 +1,13 @@
+import { PosicaoX } from '../../enum/posicao-x.enum';
+import { PosicaoY } from '../../enum/posicao-y.enum';
 import { BaseObject } from './baseObjec';
 
 export class Cinto extends BaseObject {
 	private _afivelado: boolean = false;
 	private _tipo: 2 | 3;
 
-	constructor(posicaoX: 'L' | 'R' | 'C', posicaoY: 'F' | 'B', tipo: 2 | 3 = 3) {
-		super(posicaoX, posicaoY);
+	constructor(posicaoX: PosicaoX, posicaoY: PosicaoY, tipo: 2 | 3 = 3) {
+		super(posicaoX, posicaoY, 'Cinto');
 		this._tipo = tipo;
 	}
 

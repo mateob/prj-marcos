@@ -1,9 +1,14 @@
+import { PosicaoX } from '../../enum/posicao-x.enum';
+import { PosicaoY } from '../../enum/posicao-y.enum';
+import { BabyChear, Slot } from '../../types/quem.type';
 import { ObjetoSlot } from './objeto-slot';
 import { Passageiro } from './passageiro';
 
-export class Cadeirinha extends ObjetoSlot {
+export abstract class Cadeirinha extends ObjetoSlot {
+	private _passageiro: Passageiro;
+
 	// TODO: Retirar a Cadeirinha com Generics
-	public set slot(slot: Cadeirinha | Passageiro | undefined) {
+	public set slot(slot: Slot) {
 		if (slot instanceof Cadeirinha) {
 			console.log('Não podemos colocar outra cadeira.');
 		} else if (slot) {
@@ -15,14 +20,31 @@ export class Cadeirinha extends ObjetoSlot {
 	}
 
 	// TODO: Retirar a Cadeirinha com Generics
-	public get slot(): Cadeirinha | Passageiro | undefined {
+	public get slot(): Slot {
 		return this._slot;
 	}
 
-	private _tipo: 'B' | 'C' | 'E';
+	public get tipo(): string {
+		return this._nomeEntidade;
+	}
 
-	constructor(posicaoX: string, posicaoY: string, tipo: 'B' | 'C' | 'E') {
-		super(posicaoX, posicaoY);
+	public abstract validarIdade(idade: number): boolean;
+
+	public colocarCrianca(nome: string, idade: number): void {
+		this._passageiro.sentar(nome, idade);
+	}
+
+	private _tipo: BabyChear;
+
+	constructor(
+		posicaoX: PosicaoX, 
+		posicaoY: PosicaoY, 
+		tipo: BabyChear = 'E', 
+		nome: string = 'Cadeirinha Generica'
+		) {
+		super(posicaoX, posicaoY, nome);
 		this._tipo = tipo;
+		this._passageiro = new Passageiro(posicaoX, posicaoY);
+		this._slot = this._passageiro;
 	}
 }
