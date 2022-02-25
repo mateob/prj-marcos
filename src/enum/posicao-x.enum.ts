@@ -3,3 +3,9 @@ export enum PosicaoX {
     R = 'R',
     C = 'C'
 }
+
+export enum PosicaoXText {
+    L = 'Left',
+    R = 'Right',
+    C = 'Step'
+}

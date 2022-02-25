@@ -20,12 +20,15 @@ import { BabyChear, Quem, QuemBack } from '../types/quem.type';
 import { QuemUtils } from '../utils/quem.utils';
 import { PosicaoX } from '../enum/posicao-x.enum';
 import { PosicaoY } from '../enum/posicao-y.enum';
+import { Roda } from './base/roda';
 
 export class Carro {
 	// Quando a Class e instanciada "Primeria coisa a ser feita antes de qualquer outra"
 	constructor() {
 		console.log('Chamou o construtor');
 	}
+
+	public velocidadeDoCarro: number = 0;
 
 	private _passageiros: Passageiro[] = [
 		new Passageiro(PosicaoX.L, PosicaoY.F),
@@ -35,10 +38,14 @@ export class Carro {
 		new Passageiro(PosicaoX.C, PosicaoY.B)
 	];
 
-	private _rodas: number = 4;
-	public get rodas(): number {
-		return this._rodas;
-	}
+	private _rodas: Roda[] = [
+		new Roda(PosicaoX.L, PosicaoY.F),
+		new Roda(PosicaoX.R, PosicaoY.F),
+		new Roda(PosicaoX.L, PosicaoY.B),
+		new Roda(PosicaoX.R, PosicaoY.B),
+		new Roda(PosicaoX.C, PosicaoY.B) // Step
+	];
+
 	public readonly chassi: number = 1;
 
 	private _farol: Farol[] = [
@@ -55,11 +62,6 @@ export class Carro {
 				console.log(`Farol: ${f.posicao} - Intenciade ${f.intencidade} - Cor ${f.cor}`);
 			}
 			return f;
-		});
-		this._pedais.forEach((p) => {
-			if (!(p instanceof Acelerador)) {
-				p.acao();
-			}
 		});
 		this._cinto.forEach((c) => {
 			const porta = this._portas.find((p) => p.pX === c.pX && p.pY === c.pY);
@@ -87,7 +89,10 @@ export class Carro {
 		});
 	}
 
-	public freio(): void {
+	public trocarMarcha(forcaEmbreagem: number, marcha: number): void {}
+	public acelerar(forca: number): void {}
+
+	public freio(forca: number): void {
 		this._farol.map((f) => {
 			if (f instanceof LanternaTrazeira) {
 				f.initLuzFreio();
@@ -95,17 +100,25 @@ export class Carro {
 			}
 			return f;
 		});
+		let valorFreio: number = 0;
 		this._pedais.forEach((p) => {
 			if (p instanceof Freio) {
-				p.acao();
+				valorFreio = p.acionamento(forca);
 			}
 		});
+		this.velocidadeDoCarro -= valorFreio;
+		this.danoRodas(valorFreio, PosicaoY.F);
+		this.danoRodas(valorFreio / 2, PosicaoY.B);
 	}
 
-	public abrir(quem: Quem): void {
+	private danoRodas(dano: number, posicaoY: PosicaoY): void {
+		this._rodas.filter((r) => r.pY === posicaoY && r.pX !== PosicaoX.C).forEach((r) => (r.receberDano = dano));
+	}
+
+	public abrir(quem: Quem, forca: number): void {
 		const porta = this.pesquisarEntidade(quem, this._portas) as Porta;
 		if (porta) {
-			porta.abrir();
+			porta.abrir(forca);
 		} else {
 			console.log('Não tem porta, cade a porta?');
 		}
@@ -120,13 +133,65 @@ export class Carro {
 		}
 	}
 
+	public andandoEmParalelepipedo(): void {
+		this._rodas.forEach((r) => {
+			if (r.pY === PosicaoY.F && (r.pX === PosicaoX.L || r.pX === PosicaoX.R)) {
+				r.receberDano = 10;
+			}
+			if (r.pY === PosicaoY.B && (r.pX === PosicaoX.L || r.pX === PosicaoX.R)) {
+				r.receberDano = 8;
+			}
+		});
+	}
+
+	public virarDireita(): void {
+		this._rodas.forEach((r) => {
+			if (r.pY === PosicaoY.F) {
+				if (r.pX === PosicaoX.R) {
+					r.receberDano = 8;
+				} else {
+					r.receberDano = 6;
+				}
+			}
+			if (r.pY === PosicaoY.B && (r.pX === PosicaoX.L || r.pX === PosicaoX.R)) {
+				r.receberDano = 6;
+			}
+		});
+	}
+
+	public virarEsquerda(): void {
+		this._rodas.forEach((r) => {
+			if (r.pY === PosicaoY.F) {
+				if (r.pX === PosicaoX.L) {
+					r.receberDano = 8;
+				} else {
+					r.receberDano = 6;
+				}
+			}
+			if (r.pY === PosicaoY.B && (r.pX === PosicaoX.L || r.pX === PosicaoX.R)) {
+				r.receberDano = 6;
+			}
+		});
+	}
+
 	public sentar(quem: Quem, nome: string, idade: number): void {
 		const passageiro = this.pesquisarEntidade(quem, this._passageiros) as Passageiro;
 		if (passageiro) {
-			passageiro.sentar(nome, idade);
 			const banco = this.pesquisarEntidade(quem, this._bancos) as Banco;
 			if (banco) {
-				banco.slot = passageiro;
+				if (!banco.slot || (banco.slot instanceof Passageiro && !banco.slot.acentoOcupado)) {
+					banco.slot = passageiro;
+					banco.slot.sentar(nome, idade);
+				} else {
+					console.log(`${nome} tentou sentar em ${banco.obterPosicao}`);
+					if (banco.slot instanceof Cadeirinha) {
+						console.log(`Banco esta ocupado com ${banco.slot.tipo}`);
+					} else if (banco.slot instanceof Passageiro) {
+						console.log(`Banco esta ocupado por ${banco.slot.nome}`);
+					} else {
+						console.log(`Banco esta ocupado!`);
+					}
+				}
 			} else {
 				console.log('Erro não tem banco!');
 			}
@@ -146,9 +211,9 @@ export class Carro {
 		}
 	}
 
-	public sentarCrianca(quem: 'PL' | 'PR' | 'PC', nome: string, idade: number ) {
+	public sentarCrianca(quem: 'PL' | 'PR' | 'PC', nome: string, idade: number) {
 		const banco = this.pesquisarEntidade(quem, this._bancos) as Banco;
-		if(banco){
+		if (banco) {
 			if (banco.slot instanceof Cadeirinha) {
 				if (banco.slot.validarIdade(idade)) {
 					banco.slot.colocarCrianca(nome, idade);
@@ -165,10 +230,7 @@ export class Carro {
 		}
 	}
 
-	private criarCadeirinha(
-		quem: QuemBack,
-		tipo: BabyChear,
-	): Cadeirinha | undefined {
+	private criarCadeirinha(quem: QuemBack, tipo: BabyChear): Cadeirinha | undefined {
 		const { x, y } = QuemUtils.quemE(quem);
 		switch (tipo) {
 			case PosicaoY.B:
@@ -236,14 +298,14 @@ export class Carro {
 			console.log('Cinto esta estragado ou com mal funcionamento');
 		}
 	}
-	
+
 	public listaChamada(): void {
 		this._bancos.forEach((b) => {
 			const posicao = `No ${b.obterPosicao},`;
-			if(b.slot instanceof Passageiro){
+			if (b.slot instanceof Passageiro) {
 				console.log(posicao, 'esta sentado', b.slot.nome);
 			} else if (b.slot instanceof Cadeirinha) {
-				if(b.slot.slot instanceof Passageiro){
+				if (b.slot.slot instanceof Passageiro) {
 					console.log(posicao, 'esta', b.slot.tipo, 'e esta com', b.slot.slot.nome);
 				} else {
 					console.log(posicao, 'esta', b.slot.tipo, 'e esta vazia');
@@ -256,26 +318,22 @@ export class Carro {
 
 	private _pedais: Pedal[] = [ new Acelerador(), new Freio(), new Embreagem() ];
 
-	private _portas: Porta[] = [ 
-		new Porta(PosicaoX.L, PosicaoY.F), 
-		new Porta(PosicaoX.L, PosicaoY.B), 
-		new Porta(PosicaoX.R, PosicaoY.F), 
-		new Porta(PosicaoX.R, PosicaoY.B) 
-	];
-	
-	private _bancos: Banco[] = [ 
-		new Banco(PosicaoX.L, PosicaoY.F), 
-		new Banco(PosicaoX.R, PosicaoY.F), 
-		new Banco(PosicaoX.R, PosicaoY.B), 
-		new Banco(PosicaoX.L, PosicaoY.B),
-		new Banco(PosicaoX.C, PosicaoY.B) 
+	private _portas: Porta[] = [
+		new Porta(PosicaoX.L, PosicaoY.F),
+		new Porta(PosicaoX.L, PosicaoY.B),
+		new Porta(PosicaoX.R, PosicaoY.F),
+		new Porta(PosicaoX.R, PosicaoY.B)
 	];
 
-	private _espelhos: Espelho[] = [ 
-		new Espelho(PosicaoX.L), 
-		new Espelho(PosicaoX.R), 
-		new Espelho(PosicaoX.C) 
+	private _bancos: Banco[] = [
+		new Banco(PosicaoX.L, PosicaoY.F),
+		new Banco(PosicaoX.R, PosicaoY.F),
+		new Banco(PosicaoX.R, PosicaoY.B),
+		new Banco(PosicaoX.L, PosicaoY.B),
+		new Banco(PosicaoX.C, PosicaoY.B)
 	];
+
+	private _espelhos: Espelho[] = [ new Espelho(PosicaoX.L), new Espelho(PosicaoX.R), new Espelho(PosicaoX.C) ];
 
 	private _cinto: Cinto[] = [
 		new Cinto(PosicaoX.L, PosicaoY.F),
@@ -308,10 +366,34 @@ export class Carro {
 	private _cambio: number = 1;
 	private _parabrisa: number = 2;
 	private _buzina: number = 1;
+	private _freioDeMao: number = 1;
 
 	/** Tarefa para casa - 11/02/2022 */
 	// Adicionar a propriedade TIPO a entidade Banco aceitando 'T' | PosicaoX.C
 	// Adicionar os tres bancos trazeiros ao carro.
 	// Verificar se criança tem a ideade correta para o bebe conforto, e implementar metodo para colocar a criança na cadeirinha.
 	// Apresentar mensagem de BemVindo somente quando a criança estiver na cadeirinha (slot !== undefined)
+
+	// Requisitos para terminar o projeto.
+	// Rodas
+	// Criar classes Pneu, Calota, Roda, Pastilha de Freio
+
+	// Pedais
+	// função para identificar se o carro e automatico
+
+	// Massaneta
+	// Sistema de tranca pelo alarme
+
+	// Alarme
+	// Airbag
+	// Bateria
+
+	// Banco
+	// Carro 2 portas, Regulagem para abrir passagem
+	// Regulagem do banco
+
+	// Volante
+	// Regulagem do Volante.
+
+	// Palanca de cambio.
 }

@@ -1,5 +1,6 @@
 import { PosicaoX } from '../../enum/posicao-x.enum';
 import { PosicaoY } from '../../enum/posicao-y.enum';
+import { CustomError } from '../../types/erro-carro';
 import { BaseObject } from './baseObjec';
 
 export class Porta extends BaseObject {
@@ -9,6 +10,8 @@ export class Porta extends BaseObject {
 
 	constructor(posicaoX: PosicaoX, posicaoY: PosicaoY) {
 		super(posicaoX, posicaoY, 'Porta');
+		this._resistencia = 12;
+		this._durabilidade = 80;
 	}
 
 	public get portaAberta() {
@@ -23,10 +26,28 @@ export class Porta extends BaseObject {
 		return this.acionado;
 	}
 
-	public abrir() {
+	public abrir(forca: number) {
+		if (this.aberta) {
+			throw new CustomError(`A porta já esta aberta!`, this._nomeEntidade, {
+				pX: this._posicaoX,
+				pY: this._posicaoY
+			});
+		}
 		this.aberta = true;
+		this.receberDano = forca / 2;
 		this.acionado = true;
-		console.log(`Estou sendo aberta ${this.obterPosicao}`);
+		// console.log(`Estou sendo aberta ${this.obterPosicao}`);
+	}
+
+	protected msgDanificado(): string {
+		return this.aberta ? 'Fui aberta com Violencia, toma um calmante' : 'Porta foi lacrada, pega mais leve!';
+	}
+
+	protected msgResistindo(): string {
+		if (this.aberta) {
+			throw new CustomError(`${this.obterPosicao} não foi aberta, vai malhar um pouco!`, this._nomeEntidade);
+		}
+		return super.msgResistindo();
 	}
 
 	public fechar() {

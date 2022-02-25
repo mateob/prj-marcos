@@ -11,52 +11,54 @@ const run = () => {
 		const carro1 = new Carro();
 		console.log(`Meu carro tem: 
             Chassi: ${carro1.chassi},
-            Rodas: ${carro1.rodas}
         `);
-		carro1.abrir(QuemEnum.M);
+		carro1.abrir(QuemEnum.M, 26);
 		carro1.sentar(QuemEnum.M, 'Marcelo', 32);
 		carro1.colocarCinto(QuemEnum.M);
 		carro1.fechar(QuemEnum.M);
 		console.log('*------------------------------------------------------*');
 
-		carro1.abrir(QuemEnum.C);
+		carro1.abrir(QuemEnum.C, 20);
 		// Esposa esqueceu a bolsa no banco.
 		// Abriu a porta, pegou a bolsa e fechou a porta
 		carro1.fechar(QuemEnum.C);
 		console.log('*------------------------------------------------------*');
 
 		// Filho resouvel entrar no carro pela porta trazeira.
-		carro1.abrir(QuemEnum.PR);
+		carro1.abrir(QuemEnum.PR, 20);
 		carro1.sentar(QuemEnum.PR, 'Fabricio', 14);
 		carro1.colocarCinto(QuemEnum.PR);
 		carro1.fechar(QuemEnum.PR);
 		console.log('*------------------------------------------------------*\r\n');
-		// console.log(`Estou gerando um texto com 
-		// Quebra de linha 
-		// Em mais de uma linha 
+		// console.log(`Estou gerando um texto com
+		// Quebra de linha
+		// Em mais de uma linha
 		// .....`);
 
-		carro1.abrir(QuemEnum.PL);
+		carro1.abrir(QuemEnum.PL, 20);
 		carro1.instalarCadeira(QuemEnum.PL, PosicaoY.B);
 		carro1.sentarCrianca('PL', 'Joãosinho', 1);
 
 		carro1.sentar(QuemEnum.PL, 'Maria', 6);
 		carro1.fechar(QuemEnum.PL);
+		carro1.sentar(QuemEnum.PR, 'Maria', 6);
+		carro1.sentar(QuemEnum.PC, 'Maria', 6);
+		carro1.fechar(QuemEnum.PR);
 
 		console.log('*------------------------------------------------------*');
 
-		carro1.listaChamada();
-
-
+		// carro1.listaChamada();
 
 		console.log('*------------------------------------------------------*');
 		const teste: Data = { teste: QuemEnum.C };
 		carro1.ligar();
 		console.log('Acionando a Freio');
-		carro1.freio();
+		carro1.freio(10);
 		// Aqui termina o codigo
 	} catch (error) {
-		console.log(`Deu erro: `, error);
+		if (error instanceof Error) {
+			console.log(error.message);
+		}
 	}
 };
 
