@@ -10,8 +10,8 @@ export class Porta extends BaseObject {
 
 	constructor(posicaoX: PosicaoX, posicaoY: PosicaoY) {
 		super(posicaoX, posicaoY, 'Porta');
-		this._resistencia = 12;
-		this._durabilidade = 80;
+		this.resistencia = 12;
+		this.durabilidade = 80;
 	}
 
 	public get portaAberta() {

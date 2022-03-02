@@ -12,20 +12,20 @@ const run = () => {
 		console.log(`Meu carro tem: 
             Chassi: ${carro1.chassi},
         `);
-		carro1.abrir(QuemEnum.M, 26);
-		carro1.sentar(QuemEnum.M, 'Marcelo', 32);
+		carro1.abrir(QuemEnum.M, 30);
+		carro1.sentar(QuemEnum.M, 'Marcelo', 60);
 		carro1.colocarCinto(QuemEnum.M);
 		carro1.fechar(QuemEnum.M);
 		console.log('*------------------------------------------------------*');
 
-		carro1.abrir(QuemEnum.C, 20);
+		carro1.abrir(QuemEnum.C, 30);
 		// Esposa esqueceu a bolsa no banco.
 		// Abriu a porta, pegou a bolsa e fechou a porta
 		carro1.fechar(QuemEnum.C);
 		console.log('*------------------------------------------------------*');
 
 		// Filho resouvel entrar no carro pela porta trazeira.
-		carro1.abrir(QuemEnum.PR, 20);
+		carro1.abrir(QuemEnum.PR, 30);
 		carro1.sentar(QuemEnum.PR, 'Fabricio', 14);
 		carro1.colocarCinto(QuemEnum.PR);
 		carro1.fechar(QuemEnum.PR);
@@ -35,7 +35,7 @@ const run = () => {
 		// Em mais de uma linha
 		// .....`);
 
-		carro1.abrir(QuemEnum.PL, 20);
+		carro1.abrir(QuemEnum.PL, 30);
 		carro1.instalarCadeira(QuemEnum.PL, PosicaoY.B);
 		carro1.sentarCrianca('PL', 'Joãosinho', 1);
 

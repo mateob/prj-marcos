@@ -1,34 +1,37 @@
-import { PosicaoXText, PosicaoX } from "../../enum/posicao-x.enum";
-import { PosicaoY, PosicaoYText } from "../../enum/posicao-y.enum";
-import { BaseObject } from "./baseObjec";
+import { PosicaoXText, PosicaoX } from '../../enum/posicao-x.enum';
+import { PosicaoY, PosicaoYText } from '../../enum/posicao-y.enum';
+import { BaseObject } from './baseObjec';
 
 export class Roda extends BaseObject {
-    protected msgQuebrou(): string {
-        return `${this.obterPosicao} furado ou explodiu!`;
-    }
-    protected msgDanificado(): string {
-        return `${this.obterPosicao} Vamos desviar dos burados, me resta: Resistencia ${this._resistencia} - Durabilidade: ${this._durabilidade}`;
-    }
-    
-    private _emUso: boolean = false;
+	protected msgQuebrou(): string {
+		return `${this.obterPosicao} furado ou explodiu!`;
+	}
+	protected msgDanificado(): string {
+		return `${this.obterPosicao} Vamos desviar dos burados, me resta: Resistencia ${this
+			.resistencia} - Durabilidade: ${this.durabilidade}`;
+	}
 
-    public instalar(): void {
-        this._emUso = true;
-    }
+	private _emUso: boolean = false;
 
-    public get emUso(): boolean { return this._emUso; }
+	public instalar(): void {
+		this._emUso = true;
+	}
 
-    public remover(): void {
-        this._emUso = false;
-    }
+	public get emUso(): boolean {
+		return this._emUso;
+	}
 
-    constructor(posicaoX: PosicaoX, posicaoY: PosicaoY) {
-        super(posicaoX, posicaoY, 'Pneu');
-        this._resistencia = 40;
-        this._durabilidade = 60;
-    }
+	public remover(): void {
+		this._emUso = false;
+	}
 
-    public get obterPosicao(): string {
-        return `${this._nomeEntidade} ${PosicaoXText[this._posicaoX]} ${PosicaoYText[this._posicaoY]}`;
-    }
+	constructor(posicaoX: PosicaoX, posicaoY: PosicaoY) {
+		super(posicaoX, posicaoY, 'Pneu');
+		this.resistencia = 40;
+		this.durabilidade = 60;
+	}
+
+	public get obterPosicao(): string {
+		return `${this._nomeEntidade} ${PosicaoXText[this._posicaoX]} ${PosicaoYText[this._posicaoY]}`;
+	}
 }
